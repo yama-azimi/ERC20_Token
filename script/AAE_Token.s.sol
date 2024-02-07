@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
-// scripts/DeployAAE_Token.s.sol
-import "forge-std/Script.sol";
-import "../src/AAE_Token.sol";
+import {Script, console2} from "forge-std/Script.sol";
+import {AAE_Token} from "../src/AAE_Token.sol";
+import "forge-std/console.sol";
 
 contract DeployAAE_Token is Script {
-    function run() external {
+    function setUp() public {}
+
+    function run() external returns (AAE_Token) {
         vm.startBroadcast();
-        new AAE_Token();
+
+        // Deploy the ABD_Token contract with the specified total supply
+        AAE_Token aae_token = new AAE_Token();
+
         vm.stopBroadcast();
+        return aae_token;
     }
 }
