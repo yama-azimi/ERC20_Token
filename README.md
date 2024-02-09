@@ -55,5 +55,3 @@ Foundry provides a powerful, efficient environment for smart contract developmen
 This project is licensed under the MIT License, supporting open and permissive software use, modification, and distribution.
 
 ---
-
-g
