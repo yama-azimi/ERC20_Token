@@ -4,25 +4,16 @@ pragma solidity 0.8.23;
 /// @title AAE Token: An ERC20 Token with Ownership, Pausability, and Burnability Features
 /// @dev Implements an ERC20 token standard with additional features: ownership management, pause functionality, and token burnability.
 contract AAE_Token {
-    /// @notice Token name for display
     string public constant name = "AAE_Token";
-    /// @notice Token symbol for display
     string public constant symbol = "AAET";
-    /// @notice Number of decimals for token
     uint8 public constant decimals = 18;
-    /// @notice Total supply of tokens, initially set to 1,000,000 tokens (factoring in decimals)
     uint256 public totalSupply = 1000000 * 10 ** uint256(decimals);
-    /// @notice Circulating supply at contract deployment, set to 100,000 tokens (factoring in decimals)
     uint256 public initialSupply = 100000 * 10 ** uint256(decimals);
-
-    /// @notice Address of the current owner
     address public owner;
-    /// @notice Indicates if the contract's functionality is currently paused
     bool public paused = false;
 
     /// @dev Maps account addresses to their respective token balances
     mapping(address => uint256) private balances;
-    /// @dev Maps owners to spenders with allowable withdrawal amounts
     mapping(address => mapping(address => uint256)) private allowed;
 
     /// @notice Emitted when tokens are transferred, including zero-value transfers
@@ -138,6 +129,7 @@ contract AAE_Token {
             allowed[from][msg.sender] >= amount,
             "Transfer amount exceeds allowance"
         );
+        require(amount > 0, "Transfer amount must be greater than zero");
 
         balances[from] -= amount;
         balances[to] += amount;
@@ -169,5 +161,35 @@ contract AAE_Token {
         address _spender
     ) public view returns (uint256 remaining) {
         return allowed[_owner][_spender];
+    }
+
+    function increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) public returns (bool) {
+        require(spender != address(0), "ERC20: approve to the zero address");
+        allowed[msg.sender][spender] =
+            allowed[msg.sender][spender] +
+            addedValue;
+        emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
+        return true;
+    }
+
+    function decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) public returns (bool) {
+        require(spender != address(0), "ERC20: approve to the zero address");
+        uint256 currentAllowance = allowed[msg.sender][spender];
+        require(
+            currentAllowance >= subtractedValue,
+            "ERC20: decreased allowance below zero"
+        );
+        unchecked {
+            allowed[msg.sender][spender] = currentAllowance - subtractedValue;
+        }
+
+        emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
+        return true;
     }
 }

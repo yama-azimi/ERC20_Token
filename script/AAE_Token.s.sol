@@ -30,4 +30,3 @@ contract AAE_TokenScript is Script {
         return aae_token;
     }
 }
-
