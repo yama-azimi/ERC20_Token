@@ -21,16 +21,9 @@ contract AAE_Token {
     /// @notice Emitted when tokens are transferred, including zero-value transfers
     event Transfer(address indexed from, address indexed to, uint256 amount);
     /// @notice Emitted upon approval of a spender by an owner to spend tokens
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
     /// @notice Emitted when ownership of the contract changes
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
     /// @notice Emitted when the contract is paused
     event Paused();
     /// @notice Emitted when the contract is unpaused
@@ -75,8 +68,8 @@ contract AAE_Token {
     /// @dev Requires the new owner to be a non-zero address to avoid burning tokens
     function transferOwnership(address newOwner) public onlyOwner {
         require(newOwner != address(0), "New owner is the zero address");
-        emit OwnershipTransferred(owner, newOwner);
         owner = newOwner;
+        emit OwnershipTransferred(owner, newOwner);
     }
 
     /// @notice Pauses all functions affected by the `whenNotPaused` modifier
@@ -108,10 +101,7 @@ contract AAE_Token {
     /// @param amount The amount of tokens to transfer
     /// @dev Checks for non-zero recipient address and sufficient sender balance
     /// @return success A boolean value indicating whether the transfer was successful
-    function transfer(
-        address to,
-        uint256 amount
-    ) external whenNotPaused returns (bool success) {
+    function transfer(address to, uint256 amount) external whenNotPaused returns (bool success) {
         require(to != address(0), "Cannot transfer to the zero address");
         require(balances[msg.sender] >= amount, "Insufficient balance");
 
@@ -134,17 +124,10 @@ contract AAE_Token {
     /// @param amount The amount of tokens to transfer
     /// @dev Checks for non-zero recipient address, sufficient balance, and allowance
     /// @return success A boolean value indicating whether the transfer was successful
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external whenNotPaused returns (bool success) {
+    function transferFrom(address from, address to, uint256 amount) external whenNotPaused returns (bool success) {
         require(to != address(0), "Cannot transfer to the zero address");
         require(balances[from] >= amount, "Insufficient balance");
-        require(
-            allowed[from][msg.sender] >= amount,
-            "Transfer amount exceeds allowance"
-        );
+        require(allowed[from][msg.sender] >= amount, "Transfer amount exceeds allowance");
         require(amount > 0, "Transfer amount must be greater than zero");
 
         balances[from] -= amount;
@@ -159,10 +142,7 @@ contract AAE_Token {
     /// @param amount The amount of tokens they are authorized to use
     /// @dev Emits an Approval event signaling the update
     /// @return success A boolean value indicating whether the approval was successful
-    function approve(
-        address spender,
-        uint256 amount
-    ) external whenNotPaused returns (bool success) {
+    function approve(address spender, uint256 amount) external whenNotPaused returns (bool success) {
         allowed[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
@@ -172,35 +152,21 @@ contract AAE_Token {
     /// @param _owner The owner's address
     /// @param _spender The spender's address
     /// @return remaining The remaining allowance of tokens
-    function allowance(
-        address _owner,
-        address _spender
-    ) public view returns (uint256 remaining) {
+    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
 
-    function increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) external returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
         require(spender != address(0), "ERC20: approve to the zero address");
-        allowed[msg.sender][spender] =
-            allowed[msg.sender][spender] +
-            addedValue;
+        allowed[msg.sender][spender] = allowed[msg.sender][spender] + addedValue;
         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
         return true;
     }
 
-    function decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) external returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
         require(spender != address(0), "ERC20: approve to the zero address");
         uint256 currentAllowance = allowed[msg.sender][spender];
-        require(
-            currentAllowance >= subtractedValue,
-            "ERC20: decreased allowance below zero"
-        );
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
         unchecked {
             allowed[msg.sender][spender] = currentAllowance - subtractedValue;
         }

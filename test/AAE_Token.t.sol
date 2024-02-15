@@ -2,7 +2,7 @@
 pragma solidity 0.8.23;
 
 import "forge-std/Test.sol";
-import "../src/AAE_Token.sol";
+import {AAE_Token} from "src/AAE_Token.sol";
 
 /// @title Test suite for the AAE_Token smart contract
 /// @notice Uses Foundry's test framework to ensure contract functionality is correct
@@ -18,6 +18,7 @@ contract AAE_TokenTest is Test {
     uint256 transferAmount = 100 * 10 ** 18;
     uint256 ownerBalanceBefore;
     uint256 decimals = 18;
+    address originalOwner = address(this); // Assuming the test contract itself is the owner
 
     function setUp() public {
         token = new AAE_Token();
@@ -177,19 +178,23 @@ contract AAE_TokenTest is Test {
 
         // Verify
         assertEq(token.owner(), newOwner);
-        emit log("testSuccessfulOwnershipTransfer passed");
+        // emit log("testSuccessfulOwnershipTransfer passed");
     }
 
-    function testFailedOwnershipTransferToZeroAddress() public {
+    function testUnsuccessfulOwnershipTransferToZeroAddress() public {
+        // Expect the contract to revert with the specific error message
         vm.expectRevert("New owner is the zero address");
-        token.transferOwnership(zeroAddress);
+
+        // Attempt to transfer ownership to the zero address
+        token.transferOwnership(address(0));
+
+        // Assert that the owner remains unchanged
         assertEq(
             token.owner(),
-            newOwner,
+            originalOwner,
             "Owner should remain unchanged after failed transfer"
         );
-
-        emit log("testFailedOwnershipTransferToZeroAddress passed");
+        // emit log("testUnsuccessfulOwnershipTransferToZeroAddress");
     }
 
     function testOwnershipTransferByNonOwner() public {
