@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import "forge-std/console.sol";
+
 /// @title AAE Token: An ERC20 Token with Ownership, Pausability, and Burnability Features
 /// @dev Implements an ERC20 token standard with additional features: ownership management, pause functionality, and token burnability.
 contract AAE_Token {
@@ -8,16 +10,16 @@ contract AAE_Token {
     string public constant symbol = "AAET";
     uint8 public constant decimals = 18;
     uint256 public totalSupply = 1000000 * 10 ** uint256(decimals);
-    uint256 public initialSupply = 100000 * 10 ** uint256(decimals);
+    // uint256 public initialSupply = 100000 * 10 ** uint256(decimals);
     address public owner;
     bool public paused = false;
 
     /// @dev Maps account addresses to their respective token balances
-    mapping(address => uint256) private balances;
-    mapping(address => mapping(address => uint256)) private allowed;
+    mapping(address => uint256) public balances;
+    mapping(address => mapping(address => uint256)) public allowed;
 
     /// @notice Emitted when tokens are transferred, including zero-value transfers
-    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
     /// @notice Emitted upon approval of a spender by an owner to spend tokens
     event Approval(
         address indexed owner,
@@ -51,7 +53,21 @@ contract AAE_Token {
     /// @dev Sets the original `owner` of the contract to the sender account and allocates the initial supply to them
     constructor() {
         owner = msg.sender;
-        balances[owner] = initialSupply;
+
+        // Set totalSupply to a fixed amount
+        totalSupply = 1000000 * 10 ** uint256(decimals);
+
+        // Define initialSupply as a portion of totalSupply
+        // For example, if initialSupply should be 10% of totalSupply,
+        // it would be set directly without needing to subtract from totalSupply
+        // since totalSupply is already the total amount available.
+        // initialSupply = 100000 * 10 ** uint256(decimals); // 10% of totalSupply as an example
+
+        // Allocate initialSupply to the deployer's (owner's) balance
+        balances[owner] = totalSupply;
+
+        // No need to adjust totalSupply here because initialSupply is part of the totalSupply,
+        // not in addition to it.
     }
 
     /// @notice Allows for the transfer of contract ownership to a new address
@@ -80,7 +96,7 @@ contract AAE_Token {
     /// @notice Allows tokens to be burned, reducing the total supply
     /// @param amount The amount of tokens to burn from the caller's balance
     /// @dev Adjusts both the caller's balance and the total supply
-    function burn(uint256 amount) public whenNotPaused {
+    function burn(uint256 amount) external whenNotPaused {
         require(balances[msg.sender] >= amount, "Insufficient balance to burn");
         balances[msg.sender] -= amount;
         totalSupply -= amount;
@@ -95,7 +111,7 @@ contract AAE_Token {
     function transfer(
         address to,
         uint256 amount
-    ) public whenNotPaused returns (bool success) {
+    ) external whenNotPaused returns (bool success) {
         require(to != address(0), "Cannot transfer to the zero address");
         require(balances[msg.sender] >= amount, "Insufficient balance");
 
@@ -122,7 +138,7 @@ contract AAE_Token {
         address from,
         address to,
         uint256 amount
-    ) public whenNotPaused returns (bool success) {
+    ) external whenNotPaused returns (bool success) {
         require(to != address(0), "Cannot transfer to the zero address");
         require(balances[from] >= amount, "Insufficient balance");
         require(
@@ -146,7 +162,7 @@ contract AAE_Token {
     function approve(
         address spender,
         uint256 amount
-    ) public whenNotPaused returns (bool success) {
+    ) external whenNotPaused returns (bool success) {
         allowed[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
@@ -166,7 +182,7 @@ contract AAE_Token {
     function increaseAllowance(
         address spender,
         uint256 addedValue
-    ) public returns (bool) {
+    ) external returns (bool) {
         require(spender != address(0), "ERC20: approve to the zero address");
         allowed[msg.sender][spender] =
             allowed[msg.sender][spender] +
@@ -178,7 +194,7 @@ contract AAE_Token {
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) public returns (bool) {
+    ) external returns (bool) {
         require(spender != address(0), "ERC20: approve to the zero address");
         uint256 currentAllowance = allowed[msg.sender][spender];
         require(
