@@ -1,3 +1,4 @@
 {
-	"terminal.integrated.accessibleViewFocusOnCommandExecution": true
+	"terminal.integrated.accessibleViewFocusOnCommandExecution": true,
+	"git.ignoreLimitWarning": true
 }

@@ -4,135 +4,109 @@ pragma solidity 0.8.23;
 /// @title AAE Token: An ERC20 Token with Ownership, Pausability, and Burnability Features
 /// @dev Implements an ERC20 token standard with additional features: ownership management, pause functionality, and token burnability.
 contract AAE_Token {
-    string public constant NAME = "AAE_Token";
-    string public constant SYMBOL = "AAET";
-    uint8 public constant DECIMALS = 18;
-    uint256 public totalSupply;
+    string public constant NAME = "AAE_Token"; // @inheritdoc
+    string public constant SYMBOL = "AAET"; // @inheritdoc
+    uint8 public constant DECIMALS = 18; // @inheritdoc
+    uint256 public totalSupply; // @inheritdoc
 
-    address public owner;
-    bool public paused;
+    address public owner; // @inheritdoc
+    bool public paused; // @inheritdoc
 
-    /// @dev Maps account addresses to their respective token balances
-    mapping(address => uint256) private balances;
-    mapping(address => mapping(address => uint256)) private allowed;
+    mapping(address => uint256) private balances; // @dev Tracks the balance of each address.
+    mapping(address => mapping(address => uint256)) private allowed; // @dev Tracks the allowance granted from one address to another.
 
-    /// @notice Emitted when tokens are transferred, including zero-value transfers
-    event Transfer(address indexed from, address indexed to, uint256 amount);
-    /// @notice Emitted upon approval of a spender by an owner to spend tokens
+    /// @dev Emitted when tokens are transferred, including zero-value transfers.
+    /// @param from The address of the sender.
+    /// @param to The address of the recipient.
+    /// @param amount The amount of tokens transferred.
+    event Transfer(address indexed from, address indexed to, uint256 amount); // @inheritdoc
+
+    /// @dev Emitted upon approval of a spender by an owner to spend tokens.
+    /// @param owner The address approving the spending.
+    /// @param spender The address approved to spend.
+    /// @param value The amount of tokens approved.
     event Approval(
         address indexed owner,
         address indexed spender,
         uint256 value
-    );
-    /// @notice Emitted when ownership of the contract changes
+    ); // @inheritdoc
+
+    /// @dev Emitted when ownership of the contract changes.
+    /// @param previousOwner The address of the previous owner.
+    /// @param newOwner The address of the new owner.
     event OwnershipTransferred(
         address indexed previousOwner,
         address indexed newOwner
     );
-    /// @notice Emitted when the contract is paused
+
+    /// @dev Emitted when the contract is paused.
     event Paused();
-    /// @notice Emitted when the contract is unpaused
-    event Unpaused();
-    /// @notice Emitted when tokens are burned
+
+    /// @dev Emitted when the contract is unpaused.
+    event Unpaused(); // @inheritdoc
+
+    /// @dev Emitted when tokens are burned.
+    /// @param burner The address that burned the tokens.
+    /// @param value The amount of tokens burned.
     event Burn(address indexed burner, uint256 value);
 
-    /// @dev Restricts function calls to the current owner
+    /// @dev Throws if called by any account other than the owner.
     modifier onlyOwner() {
         require(msg.sender == owner, "Caller is not the owner");
         _;
     }
 
-    /// @dev Ensures functions are callable only when the contract is not paused
+    /// @dev Throws if the contract is paused.
     modifier whenNotPaused() {
         require(!paused, "Contract is paused");
         _;
     }
 
-    /// @dev Sets the original `owner` of the contract to the sender account and allocates the initial supply to them
+    /// @dev Initializes the contract, setting the deployer as the initial owner and allocating the initial total supply to them.
     constructor() {
         owner = msg.sender;
-
-        // Set totalSupply to a fixed amount
         totalSupply = 1000000 * 10 ** uint256(DECIMALS);
-
-        // Define initialSupply as a portion of totalSupply
-        // For example, if initialSupply should be 10% of totalSupply,
-        // it would be set directly without needing to subtract from totalSupply
-        // since totalSupply is already the total amount available.
-        // initialSupply = 100000 * 10 ** uint256(decimals); // 10% of totalSupply as an example
-
-        // Allocate initialSupply to the deployer's (owner's) balance
         balances[owner] = totalSupply;
-
-        // No need to adjust totalSupply here because initialSupply is part of the totalSupply,
-        // not in addition to it.
     }
 
-    /// @notice Allows for the transfer of contract ownership to a new address
-    /// @param newOwner The address to become the new owner
-    /// @dev Requires the new owner to be a non-zero address to avoid burning tokens
-    function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0), "New owner is the zero address");
-        owner = newOwner;
-        emit OwnershipTransferred(owner, newOwner);
-    }
-
-    /// @notice Pauses all functions affected by the `whenNotPaused` modifier
-    /// @dev Can only be executed by the current owner
-    function pause() public onlyOwner {
-        paused = true;
-        emit Paused();
-    }
-
-    /// @notice Unpauses the contract, allowing normal operations to resume
-    /// @dev Can only be executed by the current owner
-    function unpause() public onlyOwner {
-        paused = false;
-        emit Unpaused();
-    }
-
-    /// @notice Allows tokens to be burned, reducing the total supply
-    /// @param amount The amount of tokens to burn from the caller's balance
-    /// @dev Adjusts both the caller's balance and the total supply
+    /// @dev Burns a specific amount of tokens from the caller’s account, reducing the total supply.
+    /// @param amount The amount of tokens to be burned.
+    /// @return A boolean value indicating whether the operation was successful.
     function burn(uint256 amount) external whenNotPaused returns (bool) {
+        require(amount > 0, "Burn amount must be greater than zero");
         require(balances[msg.sender] >= amount, "Insufficient balance to burn");
+
+        // Update state variables in a safe manner
         balances[msg.sender] -= amount;
         totalSupply -= amount;
+
+        // Emit an event to log the burn action
         emit Burn(msg.sender, amount);
-        return true; // Signify success
+
+        return true;
     }
 
-    /// @notice Transfers tokens to a specified address
-    /// @param to The recipient's address
-    /// @param amount The amount of tokens to transfer
-    /// @dev Checks for non-zero recipient address and sufficient sender balance
-    /// @return success A boolean value indicating whether the transfer was successful
+    /// @dev Transfers a specific amount of tokens to a specified address.
+    /// @param to The address to transfer to.
+    /// @param amount The amount to be transferred.
+    /// @return success A boolean indicating success of the transfer.
     function transfer(
         address to,
         uint256 amount
     ) external whenNotPaused returns (bool success) {
         require(to != address(0), "Cannot transfer to the zero address");
         require(balances[msg.sender] >= amount, "Insufficient balance");
-
         balances[msg.sender] -= amount;
         balances[to] += amount;
         emit Transfer(msg.sender, to, amount);
         return true;
     }
 
-    /// @notice Returns the balance of a specified address
-    /// @param account The address to query the balance of
-    /// @return balance The token balance of the queried address
-    function balanceOf(address account) public view returns (uint256 balance) {
-        return balances[account];
-    }
-
-    /// @notice Transfers tokens on behalf of an owner to a specified address
-    /// @param from The owner's address
-    /// @param to The recipient's address
-    /// @param amount The amount of tokens to transfer
-    /// @dev Checks for non-zero recipient address, sufficient balance, and allowance
-    /// @return success A boolean value indicating whether the transfer was successful
+    /// @dev Transfers tokens from one address to another, provided the transaction is approved.
+    /// @param from The address to transfer from.
+    /// @param to The address to transfer to.
+    /// @param amount The amount of tokens to transfer.
+    /// @return success A boolean indicating success of the transfer.
     function transferFrom(
         address from,
         address to,
@@ -145,19 +119,17 @@ contract AAE_Token {
             "Transfer amount exceeds allowance"
         );
         require(amount > 0, "Transfer amount must be greater than zero");
-
         balances[from] -= amount;
         balances[to] += amount;
         allowed[from][msg.sender] -= amount;
-        emit Transfer(from, to, amount);
+        emit Transfer(from, to, amount); // Correctly emitting Transfer event
         return true;
     }
 
-    /// @notice Approves a spender to use a specified amount of the owner's tokens
-    /// @param spender The address authorized to spend
-    /// @param amount The amount of tokens they are authorized to use
-    /// @dev Emits an Approval event signaling the update
-    /// @return success A boolean value indicating whether the approval was successful
+    /// @dev Approves a spender to transfer a specified amount of tokens on behalf of msg.sender.
+    /// @param spender The address which will spend the funds.
+    /// @param amount The amount of tokens to be spent.
+    /// @return success A boolean indicating the success of the operation.
     function approve(
         address spender,
         uint256 amount
@@ -167,29 +139,44 @@ contract AAE_Token {
         return true;
     }
 
-    /// @notice Returns the remaining amount of tokens that a spender is allowed to spend on behalf of an owner
-    /// @param _owner The owner's address
-    /// @param _spender The spender's address
-    /// @return remaining The remaining allowance of tokens
-    function allowance(
-        address _owner,
-        address _spender
-    ) public view returns (uint256 remaining) {
-        return allowed[_owner][_spender];
+    /// @dev Transfers contract ownership to a new address.
+    /// @param newOwner The address to be set as the new owner.
+    function transferOwnership(address newOwner) public onlyOwner {
+        require(newOwner != address(0), "New owner is the zero address");
+        emit OwnershipTransferred(owner, newOwner);
+        owner = newOwner;
     }
 
+    /// @dev Pauses the contract, preventing execution of functions marked with whenNotPaused.
+    function pause() public onlyOwner {
+        paused = true;
+        emit Paused();
+    }
+
+    /// @dev Unpauses the contract, allowing the execution of functions marked with whenNotPaused.
+    function unpause() public onlyOwner {
+        paused = false;
+        emit Unpaused();
+    }
+
+    /// @dev Increases the allowance granted to a spender.
+    /// @param spender The address which will spend the funds.
+    /// @param addedValue The amount of tokens to increase the allowance by.
+    /// @return A boolean indicating if the operation was successful.
     function increaseAllowance(
         address spender,
         uint256 addedValue
     ) external returns (bool) {
         require(spender != address(0), "ERC20: approve to the zero address");
-        allowed[msg.sender][spender] =
-            allowed[msg.sender][spender] +
-            addedValue;
+        allowed[msg.sender][spender] += addedValue;
         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
         return true;
     }
 
+    /// @dev Decreases the allowance granted to a spender.
+    /// @param spender The address which will spend the funds.
+    /// @param subtractedValue The amount of tokens to decrease the allowance by.
+    /// @return A boolean indicating if the operation was successful.
     function decreaseAllowance(
         address spender,
         uint256 subtractedValue
@@ -203,8 +190,25 @@ contract AAE_Token {
         unchecked {
             allowed[msg.sender][spender] = currentAllowance - subtractedValue;
         }
-
         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);
         return true;
+    }
+
+    /// @dev Returns the balance of a specified address.
+    /// @param account The address to query the balance of.
+    /// @return The number of tokens belonging to the specified address.
+    function balanceOf(address account) public view returns (uint256) {
+        return balances[account];
+    }
+
+    /// @dev Returns the amount of tokens that an owner has allowed a spender to use.
+    /// @param _owner The address of the owner.
+    /// @param _spender The address of the spender.
+    /// @return remaining The remaining amount of tokens that the spender is allowed to spend.
+    function allowance(
+        address _owner,
+        address _spender
+    ) public view returns (uint256 remaining) {
+        return allowed[_owner][_spender];
     }
 }
