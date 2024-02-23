@@ -4,13 +4,13 @@ pragma solidity 0.8.23;
 /// @title AAE Token: An ERC20 Token with Ownership, Pausability, and Burnability Features
 /// @dev Implements an ERC20 token standard with additional features: ownership management, pause functionality, and token burnability.
 contract AAE_Token {
-    string public constant NAME = "AAE_Token"; // @inheritdoc
-    string public constant SYMBOL = "AAET"; // @inheritdoc
-    uint8 public constant DECIMALS = 18; // @inheritdoc
-    uint256 public totalSupply; // @inheritdoc
+    string public constant NAME = "AAE_Token";
+    string public constant SYMBOL = "AAET";
+    uint8 public constant DECIMALS = 18;
+    uint256 public totalSupply;
 
-    address public owner; // @inheritdoc
-    bool public paused; // @inheritdoc
+    address public owner;
+    bool public paused;
 
     mapping(address => uint256) private balances; // @dev Tracks the balance of each address.
     mapping(address => mapping(address => uint256)) private allowed; // @dev Tracks the allowance granted from one address to another.
@@ -19,7 +19,7 @@ contract AAE_Token {
     /// @param from The address of the sender.
     /// @param to The address of the recipient.
     /// @param amount The amount of tokens transferred.
-    event Transfer(address indexed from, address indexed to, uint256 amount); // @inheritdoc
+    event Transfer(address indexed from, address indexed to, uint256 amount);
 
     /// @dev Emitted upon approval of a spender by an owner to spend tokens.
     /// @param owner The address approving the spending.
@@ -29,7 +29,7 @@ contract AAE_Token {
         address indexed owner,
         address indexed spender,
         uint256 value
-    ); // @inheritdoc
+    );
 
     /// @dev Emitted when ownership of the contract changes.
     /// @param previousOwner The address of the previous owner.
@@ -43,7 +43,7 @@ contract AAE_Token {
     event Paused();
 
     /// @dev Emitted when the contract is unpaused.
-    event Unpaused(); // @inheritdoc
+    event Unpaused();
 
     /// @dev Emitted when tokens are burned.
     /// @param burner The address that burned the tokens.

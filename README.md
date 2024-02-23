@@ -55,3 +55,5 @@ Foundry provides a powerful, efficient environment for smart contract developmen
 This project is licensed under the MIT License, supporting open and permissive software use, modification, and distribution.
 
 ---
+
+Deployment Scripts: forge script script/1_Deploy.s.sol --rpc-url $SEPOLIA_RPC_URL --private-key $PRIVATE_KEY -- etherscan-api $ETHERSCAN_API_KEY --broadcast -vvv
