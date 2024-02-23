@@ -32,12 +32,12 @@
             <td></td>
             <td class="headerItem">Lines:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
-            <td class="headerCovTableEntry">42</td>
-            <td class="headerCovTableEntry">42</td>
+            <td class="headerCovTableEntry">43</td>
+            <td class="headerCovTableEntry">43</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2024-02-19 22:46:59</td>
+            <td class="headerValue">2024-02-23 20:01:40</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -50,8 +50,8 @@
             <td></td>
             <td class="headerItem">Branches:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
-            <td class="headerCovTableEntry">22</td>
-            <td class="headerCovTableEntry">22</td>
+            <td class="headerCovTableEntry">24</td>
+            <td class="headerCovTableEntry">24</td>
           </tr>
                   <tr><td><img src="../../glass.png" width=3 height=3 alt=""></td></tr>
                 </table>
@@ -75,193 +75,214 @@
 <span id="L4"><span class="lineNum">       4</span>                 :             : /// @title AAE Token: An ERC20 Token with Ownership, Pausability, and Burnability Features</span>
 <span id="L5"><span class="lineNum">       5</span>                 :             : /// @dev Implements an ERC20 token standard with additional features: ownership management, pause functionality, and token burnability.</span>
 <span id="L6"><span class="lineNum">       6</span>                 :             : contract AAE_Token {</span>
-<span id="L7"><span class="lineNum">       7</span>                 :             :     string public constant NAME = &quot;AAE_Token&quot;;</span>
-<span id="L8"><span class="lineNum">       8</span>                 :             :     string public constant SYMBOL = &quot;AAET&quot;;</span>
-<span id="L9"><span class="lineNum">       9</span>                 :             :     uint8 public constant DECIMALS = 18;</span>
-<span id="L10"><span class="lineNum">      10</span>                 :             :     uint256 public totalSupply;</span>
+<span id="L7"><span class="lineNum">       7</span>                 :             :     string public constant NAME = &quot;AAE_Token&quot;; // @inheritdoc</span>
+<span id="L8"><span class="lineNum">       8</span>                 :             :     string public constant SYMBOL = &quot;AAET&quot;; // @inheritdoc</span>
+<span id="L9"><span class="lineNum">       9</span>                 :             :     uint8 public constant DECIMALS = 18; // @inheritdoc</span>
+<span id="L10"><span class="lineNum">      10</span>                 :             :     uint256 public totalSupply; // @inheritdoc</span>
 <span id="L11"><span class="lineNum">      11</span>                 :             : </span>
-<span id="L12"><span class="lineNum">      12</span>                 :             :     address public owner;</span>
-<span id="L13"><span class="lineNum">      13</span>                 :             :     bool public paused;</span>
+<span id="L12"><span class="lineNum">      12</span>                 :             :     address public owner; // @inheritdoc</span>
+<span id="L13"><span class="lineNum">      13</span>                 :             :     bool public paused; // @inheritdoc</span>
 <span id="L14"><span class="lineNum">      14</span>                 :             : </span>
-<span id="L15"><span class="lineNum">      15</span>                 :             :     mapping(address =&gt; uint256) private balances;</span>
-<span id="L16"><span class="lineNum">      16</span>                 :             :     mapping(address =&gt; mapping(address =&gt; uint256)) private allowed;</span>
+<span id="L15"><span class="lineNum">      15</span>                 :             :     mapping(address =&gt; uint256) private balances; // @dev Tracks the balance of each address.</span>
+<span id="L16"><span class="lineNum">      16</span>                 :             :     mapping(address =&gt; mapping(address =&gt; uint256)) private allowed; // @dev Tracks the allowance granted from one address to another.</span>
 <span id="L17"><span class="lineNum">      17</span>                 :             : </span>
 <span id="L18"><span class="lineNum">      18</span>                 :             :     /// @dev Emitted when tokens are transferred, including zero-value transfers.</span>
-<span id="L19"><span class="lineNum">      19</span>                 :             :     event Transfer(address indexed from, address indexed to, uint256 amount);</span>
-<span id="L20"><span class="lineNum">      20</span>                 :             :     /// @dev Emitted upon approval of a spender by an owner to spend tokens.</span>
-<span id="L21"><span class="lineNum">      21</span>                 :             :     event Approval(</span>
-<span id="L22"><span class="lineNum">      22</span>                 :             :         address indexed owner,</span>
-<span id="L23"><span class="lineNum">      23</span>                 :             :         address indexed spender,</span>
-<span id="L24"><span class="lineNum">      24</span>                 :             :         uint256 value</span>
-<span id="L25"><span class="lineNum">      25</span>                 :             :     );</span>
-<span id="L26"><span class="lineNum">      26</span>                 :             :     /// @dev Emitted when ownership of the contract changes.</span>
-<span id="L27"><span class="lineNum">      27</span>                 :             :     event OwnershipTransferred(</span>
-<span id="L28"><span class="lineNum">      28</span>                 :             :         address indexed previousOwner,</span>
-<span id="L29"><span class="lineNum">      29</span>                 :             :         address indexed newOwner</span>
-<span id="L30"><span class="lineNum">      30</span>                 :             :     );</span>
-<span id="L31"><span class="lineNum">      31</span>                 :             :     /// @dev Emitted when the contract is paused.</span>
-<span id="L32"><span class="lineNum">      32</span>                 :             :     event Paused();</span>
-<span id="L33"><span class="lineNum">      33</span>                 :             :     /// @dev Emitted when the contract is unpaused.</span>
-<span id="L34"><span class="lineNum">      34</span>                 :             :     event Unpaused();</span>
-<span id="L35"><span class="lineNum">      35</span>                 :             :     /// @dev Emitted when tokens are burned.</span>
-<span id="L36"><span class="lineNum">      36</span>                 :             :     event Burn(address indexed burner, uint256 value);</span>
-<span id="L37"><span class="lineNum">      37</span>                 :             : </span>
-<span id="L38"><span class="lineNum">      38</span>                 :             :     modifier onlyOwner() {</span>
-<span id="L39"><span class="lineNum">      39</span>                 :             :         require(msg.sender == owner, &quot;Caller is not the owner&quot;);</span>
-<span id="L40"><span class="lineNum">      40</span>                 :             :         _;</span>
-<span id="L41"><span class="lineNum">      41</span>                 :             :     }</span>
-<span id="L42"><span class="lineNum">      42</span>                 :             : </span>
-<span id="L43"><span class="lineNum">      43</span>                 :             :     modifier whenNotPaused() {</span>
-<span id="L44"><span class="lineNum">      44</span>                 :             :         require(!paused, &quot;Contract is paused&quot;);</span>
-<span id="L45"><span class="lineNum">      45</span>                 :             :         _;</span>
-<span id="L46"><span class="lineNum">      46</span>                 :             :     }</span>
+<span id="L19"><span class="lineNum">      19</span>                 :             :     /// @param from The address of the sender.</span>
+<span id="L20"><span class="lineNum">      20</span>                 :             :     /// @param to The address of the recipient.</span>
+<span id="L21"><span class="lineNum">      21</span>                 :             :     /// @param amount The amount of tokens transferred.</span>
+<span id="L22"><span class="lineNum">      22</span>                 :             :     event Transfer(address indexed from, address indexed to, uint256 amount); // @inheritdoc</span>
+<span id="L23"><span class="lineNum">      23</span>                 :             : </span>
+<span id="L24"><span class="lineNum">      24</span>                 :             :     /// @dev Emitted upon approval of a spender by an owner to spend tokens.</span>
+<span id="L25"><span class="lineNum">      25</span>                 :             :     /// @param owner The address approving the spending.</span>
+<span id="L26"><span class="lineNum">      26</span>                 :             :     /// @param spender The address approved to spend.</span>
+<span id="L27"><span class="lineNum">      27</span>                 :             :     /// @param value The amount of tokens approved.</span>
+<span id="L28"><span class="lineNum">      28</span>                 :             :     event Approval(</span>
+<span id="L29"><span class="lineNum">      29</span>                 :             :         address indexed owner,</span>
+<span id="L30"><span class="lineNum">      30</span>                 :             :         address indexed spender,</span>
+<span id="L31"><span class="lineNum">      31</span>                 :             :         uint256 value</span>
+<span id="L32"><span class="lineNum">      32</span>                 :             :     ); // @inheritdoc</span>
+<span id="L33"><span class="lineNum">      33</span>                 :             : </span>
+<span id="L34"><span class="lineNum">      34</span>                 :             :     /// @dev Emitted when ownership of the contract changes.</span>
+<span id="L35"><span class="lineNum">      35</span>                 :             :     /// @param previousOwner The address of the previous owner.</span>
+<span id="L36"><span class="lineNum">      36</span>                 :             :     /// @param newOwner The address of the new owner.</span>
+<span id="L37"><span class="lineNum">      37</span>                 :             :     event OwnershipTransferred(</span>
+<span id="L38"><span class="lineNum">      38</span>                 :             :         address indexed previousOwner,</span>
+<span id="L39"><span class="lineNum">      39</span>                 :             :         address indexed newOwner</span>
+<span id="L40"><span class="lineNum">      40</span>                 :             :     );</span>
+<span id="L41"><span class="lineNum">      41</span>                 :             : </span>
+<span id="L42"><span class="lineNum">      42</span>                 :             :     /// @dev Emitted when the contract is paused.</span>
+<span id="L43"><span class="lineNum">      43</span>                 :             :     event Paused();</span>
+<span id="L44"><span class="lineNum">      44</span>                 :             : </span>
+<span id="L45"><span class="lineNum">      45</span>                 :             :     /// @dev Emitted when the contract is unpaused.</span>
+<span id="L46"><span class="lineNum">      46</span>                 :             :     event Unpaused(); // @inheritdoc</span>
 <span id="L47"><span class="lineNum">      47</span>                 :             : </span>
-<span id="L48"><span class="lineNum">      48</span>                 :             :     /// @dev Initializes the contract, setting the deployer as the initial owner and allocating the initial total supply to them.</span>
-<span id="L49"><span class="lineNum">      49</span>                 :             :     constructor() {</span>
-<span id="L50"><span class="lineNum">      50</span>                 :             :         owner = msg.sender;</span>
-<span id="L51"><span class="lineNum">      51</span>                 :             :         totalSupply = 1000000 * 10 ** uint256(DECIMALS);</span>
-<span id="L52"><span class="lineNum">      52</span>                 :             :         balances[owner] = totalSupply;</span>
-<span id="L53"><span class="lineNum">      53</span>                 :             :     }</span>
-<span id="L54"><span class="lineNum">      54</span>                 :             : </span>
-<span id="L55"><span class="lineNum">      55</span>                 :             :     /// @dev Transfers contract ownership to a new address. Must be called by the current owner.</span>
-<span id="L56"><span class="lineNum">      56</span>                 :             :     /// @param newOwner The address to be set as the new owner.</span>
-<span id="L57"><span class="lineNum">      57</span>                 :<span class="tlaGNC tlaBgGNC">           4 :     function transferOwnership(address newOwner) public onlyOwner {</span></span>
-<span id="L58"><span class="lineNum">      58</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(newOwner != address(0), &quot;New owner is the zero address&quot;);</span></span>
-<span id="L59"><span class="lineNum">      59</span>                 :<span class="tlaGNC">           2 :         emit OwnershipTransferred(owner, newOwner);</span></span>
-<span id="L60"><span class="lineNum">      60</span>                 :<span class="tlaGNC">           2 :         owner = newOwner;</span></span>
-<span id="L61"><span class="lineNum">      61</span>                 :             :     }</span>
-<span id="L62"><span class="lineNum">      62</span>                 :             : </span>
-<span id="L63"><span class="lineNum">      63</span>                 :             :     /// @dev Pauses the contract, preventing execution of functions marked with whenNotPaused.</span>
-<span id="L64"><span class="lineNum">      64</span>                 :<span class="tlaGNC">           4 :     function pause() public onlyOwner {</span></span>
-<span id="L65"><span class="lineNum">      65</span>                 :<span class="tlaGNC">           4 :         paused = true;</span></span>
-<span id="L66"><span class="lineNum">      66</span>                 :<span class="tlaGNC">           4 :         emit Paused();</span></span>
-<span id="L67"><span class="lineNum">      67</span>                 :             :     }</span>
-<span id="L68"><span class="lineNum">      68</span>                 :             : </span>
-<span id="L69"><span class="lineNum">      69</span>                 :             :     /// @dev Unpauses the contract, allowing the execution of functions marked with whenNotPaused.</span>
-<span id="L70"><span class="lineNum">      70</span>                 :<span class="tlaGNC">           2 :     function unpause() public onlyOwner {</span></span>
-<span id="L71"><span class="lineNum">      71</span>                 :<span class="tlaGNC">           1 :         paused = false;</span></span>
-<span id="L72"><span class="lineNum">      72</span>                 :<span class="tlaGNC">           1 :         emit Unpaused();</span></span>
-<span id="L73"><span class="lineNum">      73</span>                 :             :     }</span>
-<span id="L74"><span class="lineNum">      74</span>                 :             : </span>
-<span id="L75"><span class="lineNum">      75</span>                 :             :     /// @dev Burns a specific amount of tokens from the caller’s account, reducing the total supply.</span>
-<span id="L76"><span class="lineNum">      76</span>                 :             :     /// @param amount The amount of tokens to be burned.</span>
-<span id="L77"><span class="lineNum">      77</span>                 :             :     /// @return A boolean value indicating whether the operation was successful.</span>
-<span id="L78"><span class="lineNum">      78</span>                 :<span class="tlaGNC">           3 :     function burn(uint256 amount) external whenNotPaused returns (bool) {</span></span>
-<span id="L79"><span class="lineNum">      79</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(balances[msg.sender] &gt;= amount, &quot;Insufficient balance to burn&quot;);</span></span>
+<span id="L48"><span class="lineNum">      48</span>                 :             :     /// @dev Emitted when tokens are burned.</span>
+<span id="L49"><span class="lineNum">      49</span>                 :             :     /// @param burner The address that burned the tokens.</span>
+<span id="L50"><span class="lineNum">      50</span>                 :             :     /// @param value The amount of tokens burned.</span>
+<span id="L51"><span class="lineNum">      51</span>                 :             :     event Burn(address indexed burner, uint256 value);</span>
+<span id="L52"><span class="lineNum">      52</span>                 :             : </span>
+<span id="L53"><span class="lineNum">      53</span>                 :             :     /// @dev Throws if called by any account other than the owner.</span>
+<span id="L54"><span class="lineNum">      54</span>                 :             :     modifier onlyOwner() {</span>
+<span id="L55"><span class="lineNum">      55</span>                 :             :         require(msg.sender == owner, &quot;Caller is not the owner&quot;);</span>
+<span id="L56"><span class="lineNum">      56</span>                 :             :         _;</span>
+<span id="L57"><span class="lineNum">      57</span>                 :             :     }</span>
+<span id="L58"><span class="lineNum">      58</span>                 :             : </span>
+<span id="L59"><span class="lineNum">      59</span>                 :             :     /// @dev Throws if the contract is paused.</span>
+<span id="L60"><span class="lineNum">      60</span>                 :             :     modifier whenNotPaused() {</span>
+<span id="L61"><span class="lineNum">      61</span>                 :             :         require(!paused, &quot;Contract is paused&quot;);</span>
+<span id="L62"><span class="lineNum">      62</span>                 :             :         _;</span>
+<span id="L63"><span class="lineNum">      63</span>                 :             :     }</span>
+<span id="L64"><span class="lineNum">      64</span>                 :             : </span>
+<span id="L65"><span class="lineNum">      65</span>                 :             :     /// @dev Initializes the contract, setting the deployer as the initial owner and allocating the initial total supply to them.</span>
+<span id="L66"><span class="lineNum">      66</span>                 :             :     constructor() {</span>
+<span id="L67"><span class="lineNum">      67</span>                 :             :         owner = msg.sender;</span>
+<span id="L68"><span class="lineNum">      68</span>                 :             :         totalSupply = 1000000 * 10 ** uint256(DECIMALS);</span>
+<span id="L69"><span class="lineNum">      69</span>                 :             :         balances[owner] = totalSupply;</span>
+<span id="L70"><span class="lineNum">      70</span>                 :             :     }</span>
+<span id="L71"><span class="lineNum">      71</span>                 :             : </span>
+<span id="L72"><span class="lineNum">      72</span>                 :             :     /// @dev Burns a specific amount of tokens from the caller’s account, reducing the total supply.</span>
+<span id="L73"><span class="lineNum">      73</span>                 :             :     /// @param amount The amount of tokens to be burned.</span>
+<span id="L74"><span class="lineNum">      74</span>                 :             :     /// @return A boolean value indicating whether the operation was successful.</span>
+<span id="L75"><span class="lineNum">      75</span>                 :<span class="tlaGNC tlaBgGNC">           4 :     function burn(uint256 amount) external whenNotPaused returns (bool) {</span></span>
+<span id="L76"><span class="lineNum">      76</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span>]:<span class="tlaGNC">           4 :         require(amount &gt; 0, &quot;Burn amount must be greater than zero&quot;);</span></span>
+<span id="L77"><span class="lineNum">      77</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(balances[msg.sender] &gt;= amount, &quot;Insufficient balance to burn&quot;);</span></span>
+<span id="L78"><span class="lineNum">      78</span>                 :             : </span>
+<span id="L79"><span class="lineNum">      79</span>                 :             :         // Update state variables in a safe manner</span>
 <span id="L80"><span class="lineNum">      80</span>                 :<span class="tlaGNC">           2 :         balances[msg.sender] -= amount;</span></span>
 <span id="L81"><span class="lineNum">      81</span>                 :<span class="tlaGNC">           2 :         totalSupply -= amount;</span></span>
-<span id="L82"><span class="lineNum">      82</span>                 :<span class="tlaGNC">           2 :         emit Burn(msg.sender, amount);</span></span>
-<span id="L83"><span class="lineNum">      83</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
-<span id="L84"><span class="lineNum">      84</span>                 :             :     }</span>
+<span id="L82"><span class="lineNum">      82</span>                 :             : </span>
+<span id="L83"><span class="lineNum">      83</span>                 :             :         // Emit an event to log the burn action</span>
+<span id="L84"><span class="lineNum">      84</span>                 :<span class="tlaGNC">           2 :         emit Burn(msg.sender, amount);</span></span>
 <span id="L85"><span class="lineNum">      85</span>                 :             : </span>
-<span id="L86"><span class="lineNum">      86</span>                 :             :     /// @dev Transfers a specific amount of tokens to a specified address.</span>
-<span id="L87"><span class="lineNum">      87</span>                 :             :     /// @param to The address to transfer to.</span>
-<span id="L88"><span class="lineNum">      88</span>                 :             :     /// @param amount The amount to be transferred.</span>
-<span id="L89"><span class="lineNum">      89</span>                 :             :     /// @return success A boolean indicating success of the transfer.</span>
-<span id="L90"><span class="lineNum">      90</span>                 :<span class="tlaGNC">           5 :     function transfer(</span></span>
-<span id="L91"><span class="lineNum">      91</span>                 :             :         address to,</span>
-<span id="L92"><span class="lineNum">      92</span>                 :             :         uint256 amount</span>
-<span id="L93"><span class="lineNum">      93</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
-<span id="L94"><span class="lineNum">      94</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span>]:<span class="tlaGNC">           4 :         require(to != address(0), &quot;Cannot transfer to the zero address&quot;);</span></span>
-<span id="L95"><span class="lineNum">      95</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(balances[msg.sender] &gt;= amount, &quot;Insufficient balance&quot;);</span></span>
-<span id="L96"><span class="lineNum">      96</span>                 :<span class="tlaGNC">           2 :         balances[msg.sender] -= amount;</span></span>
-<span id="L97"><span class="lineNum">      97</span>                 :<span class="tlaGNC">           2 :         balances[to] += amount;</span></span>
-<span id="L98"><span class="lineNum">      98</span>                 :<span class="tlaGNC">           2 :         emit Transfer(msg.sender, to, amount);</span></span>
-<span id="L99"><span class="lineNum">      99</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
-<span id="L100"><span class="lineNum">     100</span>                 :             :     }</span>
-<span id="L101"><span class="lineNum">     101</span>                 :             : </span>
-<span id="L102"><span class="lineNum">     102</span>                 :             :     /// @dev Returns the balance of a specified address.</span>
-<span id="L103"><span class="lineNum">     103</span>                 :             :     /// @param account The address to query the balance of.</span>
-<span id="L104"><span class="lineNum">     104</span>                 :             :     /// @return The number of tokens belonging to the specified address.</span>
-<span id="L105"><span class="lineNum">     105</span>                 :<span class="tlaGNC">           9 :     function balanceOf(address account) public view returns (uint256) {</span></span>
-<span id="L106"><span class="lineNum">     106</span>                 :<span class="tlaGNC">           9 :         return balances[account];</span></span>
-<span id="L107"><span class="lineNum">     107</span>                 :             :     }</span>
-<span id="L108"><span class="lineNum">     108</span>                 :             : </span>
-<span id="L109"><span class="lineNum">     109</span>                 :             :     /// @dev Transfers tokens from one address to another, provided the transaction is approved.</span>
-<span id="L110"><span class="lineNum">     110</span>                 :             :     /// @param from The address to transfer from.</span>
-<span id="L111"><span class="lineNum">     111</span>                 :             :     /// @param to The address to transfer to.</span>
-<span id="L112"><span class="lineNum">     112</span>                 :             :     /// @param amount The amount of tokens to transfer.</span>
-<span id="L113"><span class="lineNum">     113</span>                 :             :     /// @return success A boolean indicating success of the transfer.</span>
-<span id="L114"><span class="lineNum">     114</span>                 :<span class="tlaGNC">          10 :     function transferFrom(</span></span>
-<span id="L115"><span class="lineNum">     115</span>                 :             :         address from,</span>
-<span id="L116"><span class="lineNum">     116</span>                 :             :         address to,</span>
-<span id="L117"><span class="lineNum">     117</span>                 :             :         uint256 amount</span>
-<span id="L118"><span class="lineNum">     118</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
-<span id="L119"><span class="lineNum">     119</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 7 times"> + </span>]:<span class="tlaGNC">           8 :         require(to != address(0), &quot;Cannot transfer to the zero address&quot;);</span></span>
-<span id="L120"><span class="lineNum">     120</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 6 times"> + </span>]:<span class="tlaGNC">           7 :         require(balances[from] &gt;= amount, &quot;Insufficient balance&quot;);</span></span>
-<span id="L121"><span class="lineNum">     121</span>         [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span>]:<span class="tlaGNC">           6 :         require(</span></span>
-<span id="L122"><span class="lineNum">     122</span>                 :             :             allowed[from][msg.sender] &gt;= amount,</span>
-<span id="L123"><span class="lineNum">     123</span>                 :             :             &quot;Transfer amount exceeds allowance&quot;</span>
-<span id="L124"><span class="lineNum">     124</span>                 :             :         );</span>
-<span id="L125"><span class="lineNum">     125</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(amount &gt; 0, &quot;Transfer amount must be greater than zero&quot;);</span></span>
-<span id="L126"><span class="lineNum">     126</span>                 :<span class="tlaGNC">           2 :         balances[from] -= amount;</span></span>
-<span id="L127"><span class="lineNum">     127</span>                 :<span class="tlaGNC">           2 :         balances[to] += amount;</span></span>
-<span id="L128"><span class="lineNum">     128</span>                 :<span class="tlaGNC">           2 :         allowed[from][msg.sender] -= amount;</span></span>
-<span id="L129"><span class="lineNum">     129</span>                 :<span class="tlaGNC">           2 :         emit Transfer(from, to, amount);</span></span>
-<span id="L130"><span class="lineNum">     130</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
-<span id="L131"><span class="lineNum">     131</span>                 :             :     }</span>
-<span id="L132"><span class="lineNum">     132</span>                 :             : </span>
-<span id="L133"><span class="lineNum">     133</span>                 :             :     /// @dev Approves a spender to transfer a specified amount of tokens on behalf of msg.sender.</span>
-<span id="L134"><span class="lineNum">     134</span>                 :             :     /// @param spender The address which will spend the funds.</span>
-<span id="L135"><span class="lineNum">     135</span>                 :             :     /// @param amount The amount of tokens to be spent.</span>
-<span id="L136"><span class="lineNum">     136</span>                 :             :     /// @return success A boolean indicating the success of the operation.</span>
-<span id="L137"><span class="lineNum">     137</span>                 :<span class="tlaGNC">          13 :     function approve(</span></span>
-<span id="L138"><span class="lineNum">     138</span>                 :             :         address spender,</span>
-<span id="L139"><span class="lineNum">     139</span>                 :             :         uint256 amount</span>
-<span id="L140"><span class="lineNum">     140</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
-<span id="L141"><span class="lineNum">     141</span>                 :<span class="tlaGNC">          12 :         allowed[msg.sender][spender] = amount;</span></span>
-<span id="L142"><span class="lineNum">     142</span>                 :<span class="tlaGNC">          12 :         emit Approval(msg.sender, spender, amount);</span></span>
-<span id="L143"><span class="lineNum">     143</span>                 :<span class="tlaGNC">          12 :         return true;</span></span>
-<span id="L144"><span class="lineNum">     144</span>                 :             :     }</span>
-<span id="L145"><span class="lineNum">     145</span>                 :             : </span>
-<span id="L146"><span class="lineNum">     146</span>                 :             :     /// @dev Returns the amount of tokens that an owner has allowed a spender to use.</span>
-<span id="L147"><span class="lineNum">     147</span>                 :             :     /// @param _owner The address of the owner.</span>
-<span id="L148"><span class="lineNum">     148</span>                 :             :     /// @param _spender The address of the spender.</span>
-<span id="L149"><span class="lineNum">     149</span>                 :             :     /// @return remaining The remaining amount of tokens that the spender is allowed to spend.</span>
-<span id="L150"><span class="lineNum">     150</span>                 :<span class="tlaGNC">          10 :     function allowance(</span></span>
-<span id="L151"><span class="lineNum">     151</span>                 :             :         address _owner,</span>
-<span id="L152"><span class="lineNum">     152</span>                 :             :         address _spender</span>
-<span id="L153"><span class="lineNum">     153</span>                 :             :     ) public view returns (uint256 remaining) {</span>
-<span id="L154"><span class="lineNum">     154</span>                 :<span class="tlaGNC">          10 :         return allowed[_owner][_spender];</span></span>
-<span id="L155"><span class="lineNum">     155</span>                 :             :     }</span>
-<span id="L156"><span class="lineNum">     156</span>                 :             : </span>
-<span id="L157"><span class="lineNum">     157</span>                 :             :     /// @dev Increases the allowance granted to a spender.</span>
-<span id="L158"><span class="lineNum">     158</span>                 :             :     /// @param spender The address which will spend the funds.</span>
-<span id="L159"><span class="lineNum">     159</span>                 :             :     /// @param addedValue The amount of tokens to increase the allowance by.</span>
-<span id="L160"><span class="lineNum">     160</span>                 :             :     /// @return A boolean indicating if the operation was successful.</span>
-<span id="L161"><span class="lineNum">     161</span>                 :<span class="tlaGNC">           2 :     function increaseAllowance(</span></span>
-<span id="L162"><span class="lineNum">     162</span>                 :             :         address spender,</span>
-<span id="L163"><span class="lineNum">     163</span>                 :             :         uint256 addedValue</span>
-<span id="L164"><span class="lineNum">     164</span>                 :             :     ) external returns (bool) {</span>
-<span id="L165"><span class="lineNum">     165</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 1 time"> + </span>]:<span class="tlaGNC">           2 :       require(spender!=address(0), &quot;ERC20: approve to the zero address&quot;);</span></span>
-<span id="L166"><span class="lineNum">     166</span>                 :<span class="tlaGNC">           1 :       allowed[msg.sender][spender] =</span></span>
-<span id="L167"><span class="lineNum">     167</span>                 :             :             allowed[msg.sender][spender] +</span>
-<span id="L168"><span class="lineNum">     168</span>                 :             :             addedValue;</span>
-<span id="L169"><span class="lineNum">     169</span>                 :<span class="tlaGNC">           1 :         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);</span></span>
-<span id="L170"><span class="lineNum">     170</span>                 :<span class="tlaGNC">           1 :         return true;</span></span>
-<span id="L171"><span class="lineNum">     171</span>                 :             :     }</span>
-<span id="L172"><span class="lineNum">     172</span>                 :             : </span>
-<span id="L173"><span class="lineNum">     173</span>                 :             :     /// @dev Decreases the allowance granted to a spender.</span>
-<span id="L174"><span class="lineNum">     174</span>                 :             :     /// @param spender The address which will spend the funds.</span>
-<span id="L175"><span class="lineNum">     175</span>                 :             :     /// @param subtractedValue The amount of tokens to decrease the allowance by.</span>
-<span id="L176"><span class="lineNum">     176</span>                 :             :     /// @return A boolean indicating if the operation was successful.</span>
-<span id="L177"><span class="lineNum">     177</span>                 :<span class="tlaGNC">           9 :     function decreaseAllowance(</span></span>
-<span id="L178"><span class="lineNum">     178</span>                 :             :         address spender,</span>
-<span id="L179"><span class="lineNum">     179</span>                 :             :         uint256 subtractedValue</span>
-<span id="L180"><span class="lineNum">     180</span>                 :             :     ) external returns (bool) {</span>
-<span id="L181"><span class="lineNum">     181</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 8 times"> + </span>]:<span class="tlaGNC">           9 :         require(spender!=address(0), &quot;ERC20: approve to the zero address&quot;);</span></span>
-<span id="L182"><span class="lineNum">     182</span>                 :<span class="tlaGNC">           8 :         uint256 currentAllowance = allowed[msg.sender][spender];</span></span>
-<span id="L183"><span class="lineNum">     183</span>         [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 5 times"> + </span>]:<span class="tlaGNC">           8 :         require(</span></span>
-<span id="L184"><span class="lineNum">     184</span>                 :             :             currentAllowance &gt;= subtractedValue,</span>
-<span id="L185"><span class="lineNum">     185</span>                 :             :             &quot;ERC20: decreased allowance below zero&quot;</span>
-<span id="L186"><span class="lineNum">     186</span>                 :             :         );</span>
-<span id="L187"><span class="lineNum">     187</span>                 :             :         unchecked {</span>
-<span id="L188"><span class="lineNum">     188</span>                 :<span class="tlaGNC">           5 :           allowed[msg.sender][spender] = currentAllowance - subtractedValue;          </span></span>
-<span id="L189"><span class="lineNum">     189</span>                 :             :         }</span>
-<span id="L190"><span class="lineNum">     190</span>                 :<span class="tlaGNC">           5 :         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);</span></span>
-<span id="L191"><span class="lineNum">     191</span>                 :<span class="tlaGNC">           5 :         return true;</span></span>
-<span id="L192"><span class="lineNum">     192</span>                 :             :     }</span>
-<span id="L193"><span class="lineNum">     193</span>                 :             : }</span>
+<span id="L86"><span class="lineNum">      86</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
+<span id="L87"><span class="lineNum">      87</span>                 :             :     }</span>
+<span id="L88"><span class="lineNum">      88</span>                 :             : </span>
+<span id="L89"><span class="lineNum">      89</span>                 :             :     /// @dev Transfers a specific amount of tokens to a specified address.</span>
+<span id="L90"><span class="lineNum">      90</span>                 :             :     /// @param to The address to transfer to.</span>
+<span id="L91"><span class="lineNum">      91</span>                 :             :     /// @param amount The amount to be transferred.</span>
+<span id="L92"><span class="lineNum">      92</span>                 :             :     /// @return success A boolean indicating success of the transfer.</span>
+<span id="L93"><span class="lineNum">      93</span>                 :<span class="tlaGNC">           5 :     function transfer(</span></span>
+<span id="L94"><span class="lineNum">      94</span>                 :             :         address to,</span>
+<span id="L95"><span class="lineNum">      95</span>                 :             :         uint256 amount</span>
+<span id="L96"><span class="lineNum">      96</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
+<span id="L97"><span class="lineNum">      97</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span>]:<span class="tlaGNC">           4 :         require(to != address(0), &quot;Cannot transfer to the zero address&quot;);</span></span>
+<span id="L98"><span class="lineNum">      98</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(balances[msg.sender] &gt;= amount, &quot;Insufficient balance&quot;);</span></span>
+<span id="L99"><span class="lineNum">      99</span>                 :<span class="tlaGNC">           2 :         balances[msg.sender] -= amount;</span></span>
+<span id="L100"><span class="lineNum">     100</span>                 :<span class="tlaGNC">           2 :         balances[to] += amount;</span></span>
+<span id="L101"><span class="lineNum">     101</span>                 :<span class="tlaGNC">           2 :         emit Transfer(msg.sender, to, amount);</span></span>
+<span id="L102"><span class="lineNum">     102</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
+<span id="L103"><span class="lineNum">     103</span>                 :             :     }</span>
+<span id="L104"><span class="lineNum">     104</span>                 :             : </span>
+<span id="L105"><span class="lineNum">     105</span>                 :             :     /// @dev Transfers tokens from one address to another, provided the transaction is approved.</span>
+<span id="L106"><span class="lineNum">     106</span>                 :             :     /// @param from The address to transfer from.</span>
+<span id="L107"><span class="lineNum">     107</span>                 :             :     /// @param to The address to transfer to.</span>
+<span id="L108"><span class="lineNum">     108</span>                 :             :     /// @param amount The amount of tokens to transfer.</span>
+<span id="L109"><span class="lineNum">     109</span>                 :             :     /// @return success A boolean indicating success of the transfer.</span>
+<span id="L110"><span class="lineNum">     110</span>                 :<span class="tlaGNC">          10 :     function transferFrom(</span></span>
+<span id="L111"><span class="lineNum">     111</span>                 :             :         address from,</span>
+<span id="L112"><span class="lineNum">     112</span>                 :             :         address to,</span>
+<span id="L113"><span class="lineNum">     113</span>                 :             :         uint256 amount</span>
+<span id="L114"><span class="lineNum">     114</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
+<span id="L115"><span class="lineNum">     115</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 7 times"> + </span>]:<span class="tlaGNC">           8 :         require(to != address(0), &quot;Cannot transfer to the zero address&quot;);</span></span>
+<span id="L116"><span class="lineNum">     116</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 6 times"> + </span>]:<span class="tlaGNC">           7 :         require(balances[from] &gt;= amount, &quot;Insufficient balance&quot;);</span></span>
+<span id="L117"><span class="lineNum">     117</span>         [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 3 times"> + </span>]:<span class="tlaGNC">           6 :         require(</span></span>
+<span id="L118"><span class="lineNum">     118</span>                 :             :             allowed[from][msg.sender] &gt;= amount,</span>
+<span id="L119"><span class="lineNum">     119</span>                 :             :             &quot;Transfer amount exceeds allowance&quot;</span>
+<span id="L120"><span class="lineNum">     120</span>                 :             :         );</span>
+<span id="L121"><span class="lineNum">     121</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(amount &gt; 0, &quot;Transfer amount must be greater than zero&quot;);</span></span>
+<span id="L122"><span class="lineNum">     122</span>                 :<span class="tlaGNC">           2 :         balances[from] -= amount;</span></span>
+<span id="L123"><span class="lineNum">     123</span>                 :<span class="tlaGNC">           2 :         balances[to] += amount;</span></span>
+<span id="L124"><span class="lineNum">     124</span>                 :<span class="tlaGNC">           2 :         allowed[from][msg.sender] -= amount;</span></span>
+<span id="L125"><span class="lineNum">     125</span>                 :<span class="tlaGNC">           2 :         emit Transfer(from, to, amount); // Correctly emitting Transfer event</span></span>
+<span id="L126"><span class="lineNum">     126</span>                 :<span class="tlaGNC">           2 :         return true;</span></span>
+<span id="L127"><span class="lineNum">     127</span>                 :             :     }</span>
+<span id="L128"><span class="lineNum">     128</span>                 :             : </span>
+<span id="L129"><span class="lineNum">     129</span>                 :             :     /// @dev Approves a spender to transfer a specified amount of tokens on behalf of msg.sender.</span>
+<span id="L130"><span class="lineNum">     130</span>                 :             :     /// @param spender The address which will spend the funds.</span>
+<span id="L131"><span class="lineNum">     131</span>                 :             :     /// @param amount The amount of tokens to be spent.</span>
+<span id="L132"><span class="lineNum">     132</span>                 :             :     /// @return success A boolean indicating the success of the operation.</span>
+<span id="L133"><span class="lineNum">     133</span>                 :<span class="tlaGNC">          13 :     function approve(</span></span>
+<span id="L134"><span class="lineNum">     134</span>                 :             :         address spender,</span>
+<span id="L135"><span class="lineNum">     135</span>                 :             :         uint256 amount</span>
+<span id="L136"><span class="lineNum">     136</span>                 :             :     ) external whenNotPaused returns (bool success) {</span>
+<span id="L137"><span class="lineNum">     137</span>                 :<span class="tlaGNC">          12 :         allowed[msg.sender][spender] = amount;</span></span>
+<span id="L138"><span class="lineNum">     138</span>                 :<span class="tlaGNC">          12 :         emit Approval(msg.sender, spender, amount);</span></span>
+<span id="L139"><span class="lineNum">     139</span>                 :<span class="tlaGNC">          12 :         return true;</span></span>
+<span id="L140"><span class="lineNum">     140</span>                 :             :     }</span>
+<span id="L141"><span class="lineNum">     141</span>                 :             : </span>
+<span id="L142"><span class="lineNum">     142</span>                 :             :     /// @dev Transfers contract ownership to a new address.</span>
+<span id="L143"><span class="lineNum">     143</span>                 :             :     /// @param newOwner The address to be set as the new owner.</span>
+<span id="L144"><span class="lineNum">     144</span>                 :<span class="tlaGNC">           4 :     function transferOwnership(address newOwner) public onlyOwner {</span></span>
+<span id="L145"><span class="lineNum">     145</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 2 times"> + </span>]:<span class="tlaGNC">           3 :         require(newOwner != address(0), &quot;New owner is the zero address&quot;);</span></span>
+<span id="L146"><span class="lineNum">     146</span>                 :<span class="tlaGNC">           2 :         emit OwnershipTransferred(owner, newOwner);</span></span>
+<span id="L147"><span class="lineNum">     147</span>                 :<span class="tlaGNC">           2 :         owner = newOwner;</span></span>
+<span id="L148"><span class="lineNum">     148</span>                 :             :     }</span>
+<span id="L149"><span class="lineNum">     149</span>                 :             : </span>
+<span id="L150"><span class="lineNum">     150</span>                 :             :     /// @dev Pauses the contract, preventing execution of functions marked with whenNotPaused.</span>
+<span id="L151"><span class="lineNum">     151</span>                 :<span class="tlaGNC">           4 :     function pause() public onlyOwner {</span></span>
+<span id="L152"><span class="lineNum">     152</span>                 :<span class="tlaGNC">           4 :         paused = true;</span></span>
+<span id="L153"><span class="lineNum">     153</span>                 :<span class="tlaGNC">           4 :         emit Paused();</span></span>
+<span id="L154"><span class="lineNum">     154</span>                 :             :     }</span>
+<span id="L155"><span class="lineNum">     155</span>                 :             : </span>
+<span id="L156"><span class="lineNum">     156</span>                 :             :     /// @dev Unpauses the contract, allowing the execution of functions marked with whenNotPaused.</span>
+<span id="L157"><span class="lineNum">     157</span>                 :<span class="tlaGNC">           2 :     function unpause() public onlyOwner {</span></span>
+<span id="L158"><span class="lineNum">     158</span>                 :<span class="tlaGNC">           1 :         paused = false;</span></span>
+<span id="L159"><span class="lineNum">     159</span>                 :<span class="tlaGNC">           1 :         emit Unpaused();</span></span>
+<span id="L160"><span class="lineNum">     160</span>                 :             :     }</span>
+<span id="L161"><span class="lineNum">     161</span>                 :             : </span>
+<span id="L162"><span class="lineNum">     162</span>                 :             :     /// @dev Increases the allowance granted to a spender.</span>
+<span id="L163"><span class="lineNum">     163</span>                 :             :     /// @param spender The address which will spend the funds.</span>
+<span id="L164"><span class="lineNum">     164</span>                 :             :     /// @param addedValue The amount of tokens to increase the allowance by.</span>
+<span id="L165"><span class="lineNum">     165</span>                 :             :     /// @return A boolean indicating if the operation was successful.</span>
+<span id="L166"><span class="lineNum">     166</span>                 :<span class="tlaGNC">           2 :     function increaseAllowance(</span></span>
+<span id="L167"><span class="lineNum">     167</span>                 :             :         address spender,</span>
+<span id="L168"><span class="lineNum">     168</span>                 :             :         uint256 addedValue</span>
+<span id="L169"><span class="lineNum">     169</span>                 :             :     ) external returns (bool) {</span>
+<span id="L170"><span class="lineNum">     170</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 1 time"> + </span>]:<span class="tlaGNC">           2 :         require(spender != address(0), &quot;ERC20: approve to the zero address&quot;);</span></span>
+<span id="L171"><span class="lineNum">     171</span>                 :<span class="tlaGNC">           1 :         allowed[msg.sender][spender] += addedValue;</span></span>
+<span id="L172"><span class="lineNum">     172</span>                 :<span class="tlaGNC">           1 :         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);</span></span>
+<span id="L173"><span class="lineNum">     173</span>                 :<span class="tlaGNC">           1 :         return true;</span></span>
+<span id="L174"><span class="lineNum">     174</span>                 :             :     }</span>
+<span id="L175"><span class="lineNum">     175</span>                 :             : </span>
+<span id="L176"><span class="lineNum">     176</span>                 :             :     /// @dev Decreases the allowance granted to a spender.</span>
+<span id="L177"><span class="lineNum">     177</span>                 :             :     /// @param spender The address which will spend the funds.</span>
+<span id="L178"><span class="lineNum">     178</span>                 :             :     /// @param subtractedValue The amount of tokens to decrease the allowance by.</span>
+<span id="L179"><span class="lineNum">     179</span>                 :             :     /// @return A boolean indicating if the operation was successful.</span>
+<span id="L180"><span class="lineNum">     180</span>                 :<span class="tlaGNC">           9 :     function decreaseAllowance(</span></span>
+<span id="L181"><span class="lineNum">     181</span>                 :             :         address spender,</span>
+<span id="L182"><span class="lineNum">     182</span>                 :             :         uint256 subtractedValue</span>
+<span id="L183"><span class="lineNum">     183</span>                 :             :     ) external returns (bool) {</span>
+<span id="L184"><span class="lineNum">     184</span>         [<span class="tlaGBC" title="Branch 0 was taken 1 time"> + </span><span class="tlaGBC" title="Branch 1 was taken 8 times"> + </span>]:<span class="tlaGNC">           9 :         require(spender != address(0), &quot;ERC20: approve to the zero address&quot;);</span></span>
+<span id="L185"><span class="lineNum">     185</span>                 :<span class="tlaGNC">           8 :         uint256 currentAllowance = allowed[msg.sender][spender];</span></span>
+<span id="L186"><span class="lineNum">     186</span>         [<span class="tlaGBC" title="Branch 0 was taken 3 times"> + </span><span class="tlaGBC" title="Branch 1 was taken 5 times"> + </span>]:<span class="tlaGNC">           8 :         require(</span></span>
+<span id="L187"><span class="lineNum">     187</span>                 :             :             currentAllowance &gt;= subtractedValue,</span>
+<span id="L188"><span class="lineNum">     188</span>                 :             :             &quot;ERC20: decreased allowance below zero&quot;</span>
+<span id="L189"><span class="lineNum">     189</span>                 :             :         );</span>
+<span id="L190"><span class="lineNum">     190</span>                 :             :         unchecked {</span>
+<span id="L191"><span class="lineNum">     191</span>                 :<span class="tlaGNC">           5 :             allowed[msg.sender][spender] = currentAllowance - subtractedValue;</span></span>
+<span id="L192"><span class="lineNum">     192</span>                 :             :         }</span>
+<span id="L193"><span class="lineNum">     193</span>                 :<span class="tlaGNC">           5 :         emit Approval(msg.sender, spender, allowed[msg.sender][spender]);</span></span>
+<span id="L194"><span class="lineNum">     194</span>                 :<span class="tlaGNC">           5 :         return true;</span></span>
+<span id="L195"><span class="lineNum">     195</span>                 :             :     }</span>
+<span id="L196"><span class="lineNum">     196</span>                 :             : </span>
+<span id="L197"><span class="lineNum">     197</span>                 :             :     /// @dev Returns the balance of a specified address.</span>
+<span id="L198"><span class="lineNum">     198</span>                 :             :     /// @param account The address to query the balance of.</span>
+<span id="L199"><span class="lineNum">     199</span>                 :             :     /// @return The number of tokens belonging to the specified address.</span>
+<span id="L200"><span class="lineNum">     200</span>                 :<span class="tlaGNC">           9 :     function balanceOf(address account) public view returns (uint256) {</span></span>
+<span id="L201"><span class="lineNum">     201</span>                 :<span class="tlaGNC">           9 :         return balances[account];</span></span>
+<span id="L202"><span class="lineNum">     202</span>                 :             :     }</span>
+<span id="L203"><span class="lineNum">     203</span>                 :             : </span>
+<span id="L204"><span class="lineNum">     204</span>                 :             :     /// @dev Returns the amount of tokens that an owner has allowed a spender to use.</span>
+<span id="L205"><span class="lineNum">     205</span>                 :             :     /// @param _owner The address of the owner.</span>
+<span id="L206"><span class="lineNum">     206</span>                 :             :     /// @param _spender The address of the spender.</span>
+<span id="L207"><span class="lineNum">     207</span>                 :             :     /// @return remaining The remaining amount of tokens that the spender is allowed to spend.</span>
+<span id="L208"><span class="lineNum">     208</span>                 :<span class="tlaGNC">          10 :     function allowance(</span></span>
+<span id="L209"><span class="lineNum">     209</span>                 :             :         address _owner,</span>
+<span id="L210"><span class="lineNum">     210</span>                 :             :         address _spender</span>
+<span id="L211"><span class="lineNum">     211</span>                 :             :     ) public view returns (uint256 remaining) {</span>
+<span id="L212"><span class="lineNum">     212</span>                 :<span class="tlaGNC">          10 :         return allowed[_owner][_spender];</span></span>
+<span id="L213"><span class="lineNum">     213</span>                 :             :     }</span>
+<span id="L214"><span class="lineNum">     214</span>                 :             : }</span>
         </pre>
               </td>
             </tr>
